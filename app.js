@@ -5,7 +5,7 @@ const formatChip007Keys = require('./utils/helpers/formatChip007Keys');
 const generateHash = require('./utils/helpers/getHashFromfile');
 
 // get output file from console input
-const filePath = process.argv[2];
+const filePath = process.argv[2] || 'HNGi9 CVS FILE - Sheet1.csv';
 
 if (!filePath) {
 	console.error('Please specify file path');
@@ -37,19 +37,38 @@ const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 		};
 		// convert all uppercase and spaced keys to lowercase snake-case
 		const formattedObj = formatChip007Keys(obj);
-		console.log('Formatted object: ', formattedObj);
+
+		// convert attributes to array
+		if (formattedObj.attributes) {
+			const attributesArr = formattedObj.attributes.split(',');
+			const attrFormattedArr = [];
+
+			for (let attr of attributesArr) {
+				const attrSplit = attr.split(':');
+				console.log('attr split: ', attrSplit);
+				if (attrSplit[0] && attrSplit[1]) {
+					attrFormattedArr.push(
+						formatChip007Keys({
+							[`${attrSplit[0].trim()}`]: attrSplit[1].trim(),
+						})
+					);
+				}
+			}
+
+			formattedObj.attributes = attrFormattedArr;
+		} else {
+			formattedObj.attributes = [];
+		}
 
 		// check required chip-0007 properties according to chia docs, see https://github.com/Chia-Network/chips/blob/metadata-schema/assets/chip-0007/schema.json
-		if (!formattedObj.name || !formattedObj.description) {
-			console.error(
-				'Please ensure your csv file has a "Name" and "Description" field'
-			);
-			return;
-		}
+		// if (!formattedObj.name || !formattedObj.description) {
+		// 	console.error(
+		// 		'Please ensure your csv file has a "Name" and "Description" field'
+		// 	);
+		// 	return;
+		// }
 		newArr.push(formattedObj);
 	}
-
-	console.log(newArr);
 
 	// create json file
 	fs.writeFile(
@@ -69,6 +88,7 @@ const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 
 			// append hash to each json object and create column in csv
 			for (let obj of jsonArray) {
+				// obj['UUID'] ? (obj['Hash'] = hash) : 'sfcdsdfsd';
 				obj['Hash'] = hash;
 			}
 
@@ -82,7 +102,9 @@ const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 					return;
 				}
 
-				console.log('Output CSV generated successfully');
+				console.log(
+					`Output CSV generated successfully at ${__dirname}\\${CSV_OUTPUT}`
+				);
 			});
 		}
 	);
