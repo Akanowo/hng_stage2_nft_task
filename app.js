@@ -11,6 +11,10 @@ const filePath = process.argv[2];
 const JSON_OUTPUT = 'CHIP-0007-output.json';
 const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 
+if (!filePath) {
+	console.error('Please specify file path');
+}
+
 (async function () {
 	// convert csv to json array
 	let jsonArray;
@@ -23,8 +27,6 @@ const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 	}
 	const newArr = [];
 
-	// convert all keys to small letters
-
 	// add format key to json
 	for (let obj of jsonArray) {
 		// check required fields from Chia CHIP-0007 Docs
@@ -34,7 +36,17 @@ const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 			...obj,
 		};
 		// convert all uppercase and spaced keys to lowercase snake-case
-		newArr.push(formatChip007Keys(obj));
+		const formattedObj = formatChip007Keys(obj);
+		console.log('Formatted object: ', formattedObj);
+
+		// check required chip-0007 properties according to chia docs, see https://github.com/Chia-Network/chips/blob/metadata-schema/assets/chip-0007/schema.json
+		if (!formattedObj.name || !formattedObj.description) {
+			console.error(
+				'Please ensure your csv file has a "Name" and "Description" field'
+			);
+			return;
+		}
+		newArr.push(formattedObj);
 	}
 
 	console.log(newArr);
