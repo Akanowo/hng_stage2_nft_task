@@ -4,16 +4,16 @@ const { parseAsync } = require('json2csv');
 const formatChip007Keys = require('./utils/helpers/formatChip007Keys');
 const generateHash = require('./utils/helpers/getHashFromfile');
 
-console.log('Process argv: ', process.argv);
-
 // get output file from console input
 const filePath = process.argv[2];
-const JSON_OUTPUT = 'CHIP-0007-output.json';
-const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 
 if (!filePath) {
 	console.error('Please specify file path');
+	return;
 }
+
+const JSON_OUTPUT = 'CHIP-0007-output.json';
+const CSV_OUTPUT = `${filePath.split('.')[0]}.output.csv`;
 
 (async function () {
 	// convert csv to json array
